@@ -1,315 +1,23 @@
 /* ===================================================================================
 	Departamento Eng. Informatica - FCTUC
 	Computacao Grafica - 2021/22
-	................................................ JHenriques / APerrotta
-	Trabalho 3 - Visualizacao
+	Projeto 
+	Andre Carvalho 2019216156
+	Ficheiro principal
 ======================================================================================= */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <GL/Glut.h>
 #include "Projeto_tiro_ao_alvo.h"
 
-//--------------------------------- Definir cores
-#define RED 1.0, 0.0, 0.0, 1.0
-#define BLUE 0.0, 0.0, 1.0, 1.0
-#define YELLOW 1.0, 0.8, 0.0, 1.0
-#define GREEN 0.0, 1.0, 0.0, 1.0
-#define WHITE 1.0, 1.0, 1.0, 1.0
-#define BLACK 0.0, 0.0, 0.0, 1.0
-#define GREY 0.7, 0.7, 0.7, 1.0
-#define DARK_GREY 0.4, 0.4, 0.4, 1.0
-
-#define PI 3.14159
-#define MAX_BULLETS 12
-
-//================================================================================
-//===========================================================Variaveis e constantes
-
-GLfloat tam = 0.3;
-
-GLfloat comp = 1.5, height_aim = 0.03, larg = 0.2;
-static GLfloat gun_vertex[] = {
-	//��������������������� Cima
-	-larg, 0, comp,			 // 0
-	-larg, 0, -comp,		 // 1
-	larg, 0, -comp,			 // 2
-	larg, 0, comp,			 // 3
-							 //������������������� aim frente
-	-0.05, height_aim, -1.2, // 4
-	-0.05, height_aim, -1,	 // 5
-	0.05, height_aim, -1,	 // 6
-	0.05, height_aim, -1.2,	 // 7
-
-	-0.05, height_aim, -1, // 8
-	0.05, height_aim, -1,  // 9
-	0.05, 0, -1,		   //10
-	-0.05, 0, -1,		   // 11
-
-	//�������������������� aim esquerda
-
-	-0.15, height_aim, 0.3, // 12
-	-0.15, height_aim, 0.4, // 13
-	-0.1, height_aim, 0.4,	// 14
-	-0.1, height_aim, 0.3,	// 15
-
-	-0.15, height_aim, 0.4, // 16
-	-0.1, height_aim, 0.4,	// 17
-	-0.1, 0, 0.4,			//18
-	-0.15, 0, 0.4,			// 19
-
-	//�������������������� aim direita
-
-	0.15, height_aim, 0.3, // 20
-	0.15, height_aim, 0.4, // 21
-	0.1, height_aim, 0.4,  // 22
-	0.1, height_aim, 0.3,  // 23
-
-	0.15, height_aim, 0.4, // 24
-	0.1, height_aim, 0.4,  // 25
-	0.1, 0, 0.4,		   //26
-	0.15, 0, 0.4,		   // 27
-
-	// =================== bulltet
-
-	0.05, -height_aim, -1,	  // 28
-	0.05, -height_aim, -0.5,  // 29
-	-0.05, -height_aim, -0.5, // 30
-	-0.05, -height_aim, -1,	  // 31
-
-	0.05, -height_aim, -0.5,	  // 32
-	-0.05, -height_aim, -0.5,	  // 33
-	-0.05, -height_aim * 2, -0.5, // 34
-	0.05, -height_aim * 2, -0.5,  // 35
-
-	//
-};
-
-static GLfloat normais[] = {
-
-	//BASE
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-
-	//��������������������������������������
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-	0.0,
-	0.0,
-	1.0,
-
-};
-//------------------------------------------------------------ Cores
-static GLfloat cor[] = {
-	GREY,
-	GREY,
-	GREY,
-	GREY,
-	BLACK,
-	BLACK,
-	BLACK,
-	BLACK,
-	DARK_GREY,
-	DARK_GREY,
-	DARK_GREY,
-	DARK_GREY,
-	BLACK,
-	BLACK,
-	BLACK,
-	BLACK,
-	DARK_GREY,
-	DARK_GREY,
-	DARK_GREY,
-	DARK_GREY,
-	BLACK,
-	BLACK,
-	BLACK,
-	BLACK,
-	DARK_GREY,
-	DARK_GREY,
-	DARK_GREY,
-	DARK_GREY,
-	YELLOW,
-	YELLOW,
-	YELLOW,
-	YELLOW,
-	YELLOW,
-	YELLOW,
-	YELLOW,
-	YELLOW,
-
-};
-
-float rgb_buttons[6][3] = {
-	{1, 1, 1},
-	{1, 1, 1},
-	{1, 1, 1},
-	{1, 1, 1},
-	{1, 1, 1}};
-
-//=========================================================== FACES DA MESA
-
-static GLuint main_cima[] = {0, 1, 2, 3};				  // regra da mao direita
-static GLuint aim_frente_cima[] = {4, 5, 6, 7};			  // regra da mao direita
-static GLuint aim_frente_vertical[] = {8, 9, 10, 11};	  // regra da mao direita
-static GLuint aim_esquerda_cima[] = {12, 13, 14, 15};	  // regra da mao direita
-static GLuint aim_esquerda_vertical[] = {16, 17, 18, 19}; // regra da mao direita
-static GLuint aim_direita_cima[] = {20, 21, 22, 23};	  // regra da mao direita
-static GLuint aim_direita_vertical[] = {24, 25, 26, 27};  // regra da mao direita
-static GLuint bullet_top[] = {28, 29, 30, 31};			  // regra da mao direita
-static GLuint bullet_front[] = {32, 33, 34, 35};		  // regra da mao direita
-
-GLfloat x_aim = 0, y_aim = 0, z_aim = 0, pos_z = 20;
-float shift_value = 0.5, gun_ang_x = 0, gun_ang_y = 0, ang_rot;
-int ang = 60;
-int shot_gun = 0, speed_level = 1;
-GLfloat bullet_z = 0, destiny_x = 0, destiny_z = 0, destiny_y = 0, atual_y = 0, atual_z = 0, atual_x = 0;
-
-int left_back = 0, right_back = 0;
-float left_animation_t, right_animation_t, add_left, add_right;
-
-int speed_ang = 0, turn_right = 0, turn_left = 0, add_rot = 4, counter_right, counter_left;
-int score = 0, total_levels = 10, n_bullets = 0, max_bullets = MAX_BULLETS, rotate = 0, ang_rotate_targ = 0;
-
-float gunshots[MAX_BULLETS][4];
-
-GLint msec = 10;
-
-//++++++++++++ falta a esquerda
-//++++++++++++ falta a direita
-
-//------------------------------------------------------------ Objectos (sistema coordenadas)
-GLint wScreenMain = 600, hScreenMain = 600; //.. janela (pixeis)
-GLfloat xC = 20.0, yC = 20.0, zC = 20.0;	//.. Mundo  (unidades mundo)
-
-//-------------------------------------6----------------------- Visualizacao/Observador
-GLfloat rVisao = 10, aVisao = 0.5 * PI, incVisao = 0.05;
-GLfloat obsP[] = {rVisao * cos(aVisao), 3.0, rVisao *sin(aVisao)};
-GLfloat angZoom = 45;
-GLfloat incZoom = 3;
-
-//================================================================================
-//=========================================================================== INIT
 void inicializa(void)
 {
-	glClearColor(BLACK);	 //������������������������������Apagar
-	glEnable(GL_DEPTH_TEST); //������������������������������Profundidade
-	glShadeModel(GL_SMOOTH); //������������������������������Interpolacao de cores
+	glClearColor(BLACK);
+	glEnable(GL_DEPTH_TEST);
+	glShadeModel(GL_SMOOTH);
 
 	glFrontFace(GL_CCW);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
-	//glVertexPointer(3, GL_FLOAT, 0, vertices_comando); //���������������VertexArrays: vertices + normais + cores
-	glVertexPointer(3, GL_FLOAT, 0, gun_vertex); //���������������VertexArrays: vertices + normais + cores
+	glVertexPointer(3, GL_FLOAT, 0, gun_vertex);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glNormalPointer(GL_FLOAT, 0, normais);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -339,7 +47,6 @@ void reset_but_color()
 void drawCircle(float t, float z)
 {
 
-	int num = 10000;
 	glPushMatrix();
 
 	glBegin(GL_POLYGON);
@@ -350,14 +57,6 @@ void drawCircle(float t, float z)
 	}
 	glEnd();
 
-	/*for (int i = 0; i < num; i++) {
-		glRotatef(360.0 * i / num, 0, 0, 1);
-		glBegin(GL_POLYGON);
-			glVertex3f(-t, -t, z);
-			glVertex3f(-t, t, z);e
-			glVertex3f(t, 0, z);
-			glEnd();
-	}*/
 	glPopMatrix();
 }
 
@@ -379,7 +78,7 @@ void display_dot(float x, float y, float z, float dot_size)
 	glPopMatrix();
 }
 
-void drawTarget(int levels, float  dot_size)
+void drawTarget(int levels, float dot_size)
 {
 
 	glPushMatrix();
@@ -427,7 +126,6 @@ void draw_gun()
 	glTranslatef(0, 0, pos_z);
 	glRotatef(gun_ang_y, 0, 1, 0);
 	glRotatef(gun_ang_x, 1, 0, 0);
-	//glRotatef(10, 0, 0, 1);
 
 	glTranslatef(0, -1, -comp);
 
@@ -473,7 +171,6 @@ void draw_gun()
 	glTranslatef(0, 0, pos_z);
 	glRotatef(gun_ang_y, 0, 1, 0);
 	glRotatef(gun_ang_x, 1, 0, 0);
-	//glRotatef(10, 0, 0, 1);
 
 	glTranslatef(0, -1, -comp);
 
@@ -645,7 +342,7 @@ void draw_stats()
 	{
 		char num[3];
 		sprintf_s(num, 3, "%d", i);
-		write_text(num, (1.4 - 0.02 * i) * cos(PI * (180 - ((i - 1) * 20)) / 180.0), (1.4 - 0.02 * i) * sin(PI * (180 - ((i - 1) * 20)) / 180.0));
+		write_text(num, (1.4 - 0.03 * i) * cos(PI * (180 - ((i - 1) * 20)) / 180.0), (1.4 - 0.03 * i) * sin(PI * (180 - ((i - 1) * 20)) / 180.0));
 	}
 
 	float raio = 1;
@@ -697,53 +394,51 @@ void draw_stats()
 	glPopMatrix();
 }
 
-
-void draw_mini_target() {
+void draw_mini_target()
+{
 
 	glPushMatrix();
 	glColor4f(WHITE);
 
-	write_text((char*)"Target:", -7.5, 11);
-		glTranslatef(0, -2, 0);
-		drawTarget(total_levels, 0.5);
+	write_text((char *)"Target:", -7.5, 11);
+	glTranslatef(0, -2, 0);
+	drawTarget(total_levels, 0.5);
 	glPopMatrix();
-
 }
 
 void display(void)
 {
 
-	//========================= APaga ecran e lida com profundidade (3D)
+	//========================= Apaga ecran e lida com profundidade (3D)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//����������������������������� main screen
 
 	glViewport(200, 0, wScreenMain, hScreenMain);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	//glOrtho(-10, 10, -10, 10, -10, 10);
 	gluPerspective(90, (float)wScreenMain / hScreenMain, 0.1, 1000);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(0, 0, pos_z, x_aim, y_aim, z_aim, 0, 1, 0);
 
-	//gluLookAt(0, 5, pos_z, 0, 0, pos_z, 0, 0, 1);
-
 	draw_gun();
-	drawTarget(total_levels,0.2);
+	drawTarget(total_levels, 0.2);
 
-	//����������������������������������������������������������
+	//�������������������������������������� controller
 
 	glViewport(0, 0, 200, 200);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-4, 4, -4, 4, -4, 4);
-	//gluPerspective(angZoom, (float)100 / 100, 0.1, 3 * zC);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
 	gluLookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
 
-	//����������������������������������������������������������
 	draw_controller();
+
+	//�������������������������������������������� stats
 
 	glViewport(0, 300, 200, 300);
 	glMatrixMode(GL_PROJECTION);
@@ -757,6 +452,7 @@ void display(void)
 
 	draw_stats();
 
+	//�������������������������������������������� stats
 
 	glViewport(50, 200, 100, 100);
 	glMatrixMode(GL_PROJECTION);
@@ -768,15 +464,11 @@ void display(void)
 
 	gluLookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
 
-
 	draw_mini_target();
 
-	
-
-
+	// reset buttons color
 	reset_but_color();
 
-	//. . . . . . . . . . . . . . . . . . . . .  Actualizacao
 	glutSwapBuffers();
 }
 
@@ -930,32 +622,8 @@ void keyboard(unsigned char key, int x, int y)
 	}
 }
 
-// As setinhas nao sao usadas
-//
-//void teclasNotAscii(int key, int x, int y) {
-//
-//	if (key == GLUT_KEY_UP) {
-//		y_aim += shift_value;
-//		glutPostRedisplay();
-//	}
-//	if (key == GLUT_KEY_DOWN) {
-//		y_aim -= shift_value;
-//		glutPostRedisplay();
-//	}
-//	if (key == GLUT_KEY_LEFT) {
-//		x_aim -= shift_value;
-//		glutPostRedisplay();
-//	}
-//	if (key == GLUT_KEY_RIGHT) {
-//		x_aim += shift_value;
-//		glutPostRedisplay();
-//	}
-//
-//
-//}
+//======================================================= MAIN
 
-//======================================================= MAIN
-//======================================================= MAIN
 int main(int argc, char **argv)
 {
 
@@ -963,11 +631,10 @@ int main(int argc, char **argv)
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(800, 600);
 	glutInitWindowPosition(300, 100);
-	glutCreateWindow("Shot with P; Move with w/a/s/d; Change speed with q/e");
+	glutCreateWindow("Shot with P; Move with w/a/s/d; Change speed with q/e; Rotate target with r");
 
 	inicializa();
 
-	//glutSpecialFunc(teclasNotAscii); not used
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
 	glutTimerFunc(msec, Timer, 1);
