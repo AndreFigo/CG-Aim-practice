@@ -10,6 +10,8 @@
 
 void initMaterials(int material)
 {
+	float corRed[] = {1, 0.1, 0.1, 1};
+	float corWhite[] = {1, 1, 1, 1};
 
 	switch (material)
 	{
@@ -36,6 +38,16 @@ void initMaterials(int material)
 		glMaterialfv(GL_FRONT, GL_DIFFUSE, darkSilverDif);
 		glMaterialfv(GL_FRONT, GL_SPECULAR, darkSilverSpec);
 		glMaterialf(GL_FRONT, GL_SHININESS, darkSilverCoef);
+		break;
+	case 4: //…………………………………………………………………………………………… red
+		glMaterialfv(GL_FRONT, GL_AMBIENT, corRed);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, corRed);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, corRed);
+		break;
+	case 5: //…………………………………………………………………………………………… white
+		glMaterialfv(GL_FRONT, GL_AMBIENT, corWhite);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, corWhite);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, corWhite);
 		break;
 	}
 }
@@ -88,7 +100,7 @@ void defineLuzes()
 	GLfloat Foco_ak = 1.0;
 	GLfloat Foco_al = 0.05f;
 	GLfloat Foco_aq = 0.0f;
-	GLfloat Foco_Expon = 10.0; // Foco, SPOT_Exponent
+
 	printf("pos foco %f\n", pos_foco[2]);
 	//……………………………………………………………………………………………………………………………Foco laser
 	glLightfv(GL_LIGHT1, GL_POSITION, pos_foco);
@@ -181,6 +193,29 @@ void display_dot(float x, float y, float z, float dot_size)
 	glPopMatrix();
 }
 
+void draw_malha(int lado, int dim, float z)
+{
+	float med_dim = (float)dim / 2;
+
+	glPushMatrix();
+	glScalef(lado, lado, lado);
+	glTranslatef(-1.0, -1.0, 0); // meio do poligono
+
+	glNormal3f(0, 0, 1); // normal
+
+	glBegin(GL_QUADS);
+	for (int i = 0; i < dim; i++)
+		for (int j = 0; j < dim; j++)
+		{
+			glVertex3f((float)j / med_dim, (float)i / med_dim, z);
+			glVertex3f((float)(j + 1) / med_dim, (float)i / med_dim, z);
+			glVertex3f((float)(j + 1) / med_dim, (float)(i + 1) / med_dim, z);
+			glVertex3f((float)j / med_dim, (float)(i + 1) / med_dim, z);
+		}
+	glEnd();
+	glPopMatrix();
+}
+
 void drawTarget(int levels, float dot_size)
 {
 
@@ -197,11 +232,11 @@ void drawTarget(int levels, float dot_size)
 	for (int i = 0; i < levels; i++)
 	{
 		if (i % 2 == 1)
-			glColor4f(RED);
+			initMaterials(4);
 		else
-			glColor4f(WHITE);
+			initMaterials(5);
 
-		drawCircle(i + 1, z);
+		draw_malha(i + 1, malha_dim, z);
 		z -= 0.01;
 	}
 	z = 0.01;
@@ -532,7 +567,7 @@ void iluminacao()
 
 void display(void)
 {
-
+	printf("malha dim %d\n", malha_dim);
 	//========================= Apaga ecran e lida com profundidade (3D)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_LIGHTING);
@@ -637,7 +672,7 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case 'k':
 	case 'K':
-		aberturaFoco += 1;
+		aberturaFoco += 0.1;
 		if (aberturaFoco > 20)
 			aberturaFoco = 20;
 		glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, aberturaFoco);
@@ -646,10 +681,44 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case 'j':
 	case 'J':
-		aberturaFoco -= 1;
-		if (aberturaFoco < 1)
-			aberturaFoco = 1;
+		aberturaFoco -= 0.1;
+		if (aberturaFoco < 0.1)
+			aberturaFoco = 0.1;
 		glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, aberturaFoco);
+
+		glutPostRedisplay();
+		break;
+	case 'm':
+	case 'M':
+		Foco_Expon += 5;
+		if (Foco_Expon > 100)
+			Foco_Expon = 100;
+		glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, Foco_Expon);
+
+		glutPostRedisplay();
+		break;
+	case 'n':
+	case 'N':
+		Foco_Expon -= 5;
+		if (Foco_Expon <= 0)
+			Foco_Expon = 0.1;
+		glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, Foco_Expon);
+
+		glutPostRedisplay();
+		break;
+	case 'x':
+	case 'X':
+		malha_dim *= 2;
+		if (malha_dim > 128)
+			malha_dim = 128;
+
+		glutPostRedisplay();
+		break;
+	case 'z':
+	case 'Z':
+		malha_dim /= 2;
+		if (malha_dim < 1)
+			malha_dim = 1;
 
 		glutPostRedisplay();
 		break;

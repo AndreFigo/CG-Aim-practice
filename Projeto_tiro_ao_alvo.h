@@ -267,13 +267,14 @@ GLuint texture;
 
 GLfloat pos_foco[] = {0.0f, 0.0f, pos_z - (2 * comp), 1.0f}; // Foco 1
 GLfloat aberturaFoco = 1;
+GLfloat Foco_Expon = 10.0; // Foco, SPOT_Exponent
 
 GLint luzR = 1; //:::   'R'
 GLint luzG = 1; //:::   'G'
 GLint luzB = 1; //:::   'B'
 
 int turn_on_main_light = 1;
-GLfloat intensidade_main = 0.1;
+GLfloat intensidade_main = 0.5;
 
 GLfloat luzGlobalCorAmb[4] = {0.1, 0.1, 0.1, 1.0}; //
 GLfloat localPos[4] = {0.0, 10, pos_z / 2, 1.0};
@@ -302,5 +303,9 @@ GLfloat darkSilverAmb[] = {0.09225, 0.09225, 0.09225};
 GLfloat darkSilverDif[] = {0.40754, 0.40754, 0.40754};
 GLfloat darkSilverSpec[] = {0.408273, 0.408273, 0.408273};
 GLint darkSilverCoef = 0.4 * 128;
+
+//============================================ Materials
+
+GLint malha_dim = 32;
 
 #endif /* tiro_ao_alvo_h */
