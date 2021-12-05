@@ -1,27 +1,130 @@
 /* ===================================================================================
 	Departamento Eng. Informatica - FCTUC
 	Computacao Grafica - 2021/22
-	Projeto 
+	Projeto
 	Andre Carvalho 2019216156
 	Ficheiro principal
 ======================================================================================= */
 
 #include "Projeto_tiro_ao_alvo.h"
 
+void initMaterials(int material)
+{
+
+	switch (material)
+	{
+	case 0: //…………………………………………………………………………………………… gold
+		glMaterialfv(GL_FRONT, GL_AMBIENT, goldAmb);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, goldDif);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, goldSpec);
+		glMaterialf(GL_FRONT, GL_SHININESS, goldCoef);
+		break;
+	case 1: //……………………………………………………………………………………………black
+		glMaterialfv(GL_FRONT, GL_AMBIENT, blackPlasticAmb);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, blackPlasticDif);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, blackPlasticSpec);
+		glMaterialf(GL_FRONT, GL_SHININESS, blackPlasticCoef);
+		break;
+	case 2: //……………………………………………………………………………………………silver
+		glMaterialfv(GL_FRONT, GL_AMBIENT, silverAmb);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, silverDif);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, silverSpec);
+		glMaterialf(GL_FRONT, GL_SHININESS, silverCoef);
+		break;
+	case 3: //…………………………………………………………………………………………… dark silver
+		glMaterialfv(GL_FRONT, GL_AMBIENT, darkSilverAmb);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, darkSilverDif);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, darkSilverSpec);
+		glMaterialf(GL_FRONT, GL_SHININESS, darkSilverCoef);
+		break;
+	}
+}
+
+void initTexturas()
+{
+	//----------------------------------------- Gun texture
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	imag.LoadBmpFile("gun_text.bmp");
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3,
+				 imag.GetNumCols(),
+				 imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
+				 imag.ImageData());
+}
+
+void updateLuz()
+{
+	localCorAmb[0] = luzR * intensidade_main;
+	localCorAmb[1] = luzG * intensidade_main;
+	localCorAmb[2] = luzB * intensidade_main;
+	localCorDif[0] = luzR * intensidade_main;
+	localCorDif[1] = luzG * intensidade_main;
+	localCorDif[2] = luzB * intensidade_main;
+	localCorEsp[0] = luzR * intensidade_main;
+	localCorEsp[1] = luzG * intensidade_main;
+	localCorEsp[2] = luzB * intensidade_main;
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, localCorAmb);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, localCorDif);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, localCorEsp);
+}
+
+void defineLuzes()
+{
+
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzGlobalCorAmb);
+	glLightfv(GL_LIGHT0, GL_POSITION, localPos);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, localCorAmb);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, localCorDif);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, localCorEsp);
+
+	GLfloat Foco_direccao[] = {x_aim, y_aim, z_aim - pos_z, 0}; //……… -Z
+	GLfloat Foco_cor[] = {0, 1, 0, 1};							//……… Cor da luz 1
+	GLfloat Foco_ak = 1.0;
+	GLfloat Foco_al = 0.05f;
+	GLfloat Foco_aq = 0.0f;
+	GLfloat Foco_Expon = 10.0; // Foco, SPOT_Exponent
+	printf("pos foco %f\n", pos_foco[2]);
+	//……………………………………………………………………………………………………………………………Foco laser
+	glLightfv(GL_LIGHT1, GL_POSITION, pos_foco);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, Foco_cor);
+	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, Foco_ak);
+	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, Foco_al);
+	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, Foco_aq);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, aberturaFoco);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, Foco_direccao);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, Foco_Expon);
+}
+
 void inicializa(void)
 {
 	glClearColor(BLACK);
-	glEnable(GL_DEPTH_TEST);
 	glShadeModel(GL_SMOOTH);
+	glEnable(GL_NORMALIZE);
 
+	glEnable(GL_DEPTH_TEST);
 	glFrontFace(GL_CCW);
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+
+	initTexturas();
+	defineLuzes();
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, gun_vertex);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glNormalPointer(GL_FLOAT, 0, normais);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glColorPointer(4, GL_FLOAT, 0, cor);
+	// glEnableClientState(GL_COLOR_ARRAY);
+	// glColorPointer(4, GL_FLOAT, 0, cor);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glTexCoordPointer(2, GL_FLOAT, 0, textures_array); // coordenadas textura
 
 	ang_rot = atan(shift_value / pos_z) * 180 / PI;
 }
@@ -118,7 +221,7 @@ void drawTarget(int levels, float dot_size)
 
 void draw_gun()
 {
-
+	glEnable(GL_TEXTURE_2D);
 	glPushMatrix();
 
 	glPushMatrix();
@@ -128,16 +231,24 @@ void draw_gun()
 	glRotatef(gun_ang_x, 1, 0, 0);
 
 	glTranslatef(0, -1, -comp);
+	glBindTexture(GL_TEXTURE_2D, texture);
 
+	initMaterials(2);
 	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, main_cima);
+	initMaterials(1);
+
 	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, aim_frente_cima);
-	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, aim_frente_vertical);
 	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, aim_esquerda_cima);
-	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, aim_esquerda_vertical);
 	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, aim_direita_cima);
+
+	initMaterials(3);
+	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, aim_frente_vertical);
+	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, aim_esquerda_vertical);
 	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, aim_direita_vertical);
 
 	glPopMatrix();
+
+	glDisable(GL_TEXTURE_2D);
 
 	// bullet animation
 	glPushMatrix();
@@ -173,6 +284,7 @@ void draw_gun()
 	glRotatef(gun_ang_x, 1, 0, 0);
 
 	glTranslatef(0, -1, -comp);
+	initMaterials(0);
 
 	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, bullet_top);
 	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, bullet_front);
@@ -406,11 +518,24 @@ void draw_mini_target()
 	glPopMatrix();
 }
 
+void iluminacao()
+{
+	glLightfv(GL_LIGHT0, GL_POSITION, localPos);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, localCorAmb);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, localCorDif);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, localCorEsp);
+	if (turn_on_main_light)
+		glEnable(GL_LIGHT0);
+	else
+		glDisable(GL_LIGHT0);
+}
+
 void display(void)
 {
 
 	//========================= Apaga ecran e lida com profundidade (3D)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_LIGHTING);
 
 	//����������������������������� main screen
 
@@ -422,8 +547,12 @@ void display(void)
 	glLoadIdentity();
 	gluLookAt(0, 0, pos_z, x_aim, y_aim, z_aim, 0, 1, 0);
 
+	iluminacao();
+	updateLuz();
+
 	draw_gun();
 	drawTarget(total_levels, 0.2);
+	glDisable(GL_LIGHTING);
 
 	//�������������������������������������� controller
 
@@ -452,7 +581,7 @@ void display(void)
 
 	draw_stats();
 
-	//�������������������������������������������� stats
+	//�������������������������������������������� mini target
 
 	glViewport(50, 200, 100, 100);
 	glMatrixMode(GL_PROJECTION);
@@ -484,6 +613,46 @@ void keyboard(unsigned char key, int x, int y)
 
 	switch (key)
 	{
+	case 'i':
+	case 'I':
+		intensidade_main = intensidade_main - 0.1;
+		if (intensidade_main < 0)
+			intensidade_main = 0;
+
+		glutPostRedisplay();
+		break;
+	case 'o':
+	case 'O':
+		intensidade_main = intensidade_main + 0.1;
+		if (intensidade_main > 1)
+			intensidade_main = 1;
+
+		glutPostRedisplay();
+		break;
+	case 'l':
+	case 'L':
+		turn_on_main_light = !turn_on_main_light;
+
+		glutPostRedisplay();
+		break;
+	case 'k':
+	case 'K':
+		aberturaFoco += 1;
+		if (aberturaFoco > 20)
+			aberturaFoco = 20;
+		glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, aberturaFoco);
+
+		glutPostRedisplay();
+		break;
+	case 'j':
+	case 'J':
+		aberturaFoco -= 1;
+		if (aberturaFoco < 1)
+			aberturaFoco = 1;
+		glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, aberturaFoco);
+
+		glutPostRedisplay();
+		break;
 
 	case 'w':
 	case 'W':

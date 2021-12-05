@@ -18,10 +18,24 @@
     <ClCompile Include="Projeto_tiro_ao_alvo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RgbImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Projeto_tiro_ao_alvo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RgbImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\OneDrive - Universidade de Coimbra\UNI\LEI\Inforestudante\3_ano\1_semestre\CG\PROJETO\target.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="gun_text.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -140,9 +140,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Projeto_tiro_ao_alvo.cpp" />
+    <ClCompile Include="RgbImage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Projeto_tiro_ao_alvo.h" />
+    <ClInclude Include="RgbImage.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\OneDrive - Universidade de Coimbra\UNI\LEI\Inforestudante\3_ano\1_semestre\CG\PROJETO\target.bmp" />
+    <Image Include="gun_text.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
