@@ -34,20 +34,23 @@ void initMaterials(int material)
 		glMaterialf(GL_FRONT, GL_SHININESS, silverCoef);
 		break;
 	case 3: //…………………………………………………………………………………………… dark silver
-		glMaterialfv(GL_FRONT, GL_AMBIENT, darkSilverAmb);
-		glMaterialfv(GL_FRONT, GL_DIFFUSE, darkSilverDif);
-		glMaterialfv(GL_FRONT, GL_SPECULAR, darkSilverSpec);
-		glMaterialf(GL_FRONT, GL_SHININESS, darkSilverCoef);
+		glMaterialfv(GL_FRONT, GL_AMBIENT, turqAmb);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, turqDif);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, turqSpec);
+		glMaterialf(GL_FRONT, GL_SHININESS, turqCoef);
 		break;
 	case 4: //…………………………………………………………………………………………… red
 		glMaterialfv(GL_FRONT, GL_AMBIENT, corRed);
 		glMaterialfv(GL_FRONT, GL_DIFFUSE, corRed);
 		glMaterialfv(GL_FRONT, GL_SPECULAR, corRed);
+		glMaterialf(GL_FRONT, GL_SHININESS, TargetCoef);
+
 		break;
 	case 5: //…………………………………………………………………………………………… white
 		glMaterialfv(GL_FRONT, GL_AMBIENT, corWhite);
 		glMaterialfv(GL_FRONT, GL_DIFFUSE, corWhite);
 		glMaterialfv(GL_FRONT, GL_SPECULAR, corWhite);
+		glMaterialf(GL_FRONT, GL_SHININESS, TargetCoef);
 		break;
 	}
 }
@@ -101,7 +104,6 @@ void defineLuzes()
 	GLfloat Foco_al = 0.05f;
 	GLfloat Foco_aq = 0.0f;
 
-	printf("pos foco %f\n", pos_foco[2]);
 	//……………………………………………………………………………………………………………………………Foco laser
 	glLightfv(GL_LIGHT1, GL_POSITION, pos_foco);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, Foco_cor);
@@ -120,6 +122,8 @@ void inicializa(void)
 	glEnable(GL_NORMALIZE);
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glFrontFace(GL_CCW);
 
 	glEnable(GL_LIGHTING);
@@ -240,6 +244,8 @@ void drawTarget(int levels, float dot_size)
 		z -= 0.01;
 	}
 	z = 0.01;
+	initMaterials(1);
+
 	for (int i = 0; i < n_bullets; i++)
 	{
 		if (gunshots[i][2])
@@ -276,7 +282,7 @@ void draw_gun()
 	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, aim_esquerda_cima);
 	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, aim_direita_cima);
 
-	initMaterials(3);
+	initMaterials(1);
 	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, aim_frente_vertical);
 	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, aim_esquerda_vertical);
 	glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, aim_direita_vertical);
@@ -545,10 +551,11 @@ void draw_mini_target()
 {
 
 	glPushMatrix();
-	glColor4f(WHITE);
+	initMaterials(5);
 
 	write_text((char *)"Target:", -7.5, 11);
 	glTranslatef(0, -2, 0);
+
 	drawTarget(total_levels, 0.5);
 	glPopMatrix();
 }
@@ -565,12 +572,39 @@ void iluminacao()
 		glDisable(GL_LIGHT0);
 }
 
+void draw_obstacle(int altura, int largura)
+{
+	initMaterials(3);
+
+	glPushMatrix();
+
+	offset_obst += obst_change;
+
+	if (offset_obst > 15 || offset_obst < -15)
+	{
+		obst_change = -obst_change;
+	}
+
+	glTranslatef(0, 0, 2);
+	glTranslatef(offset_obst, 0, 0);
+
+	glBegin(GL_QUADS);
+
+	glVertex3f(-largura / 2, altura / 2, 0);
+	glVertex3f(largura / 2, altura / 2, 0);
+	glVertex3f(largura / 2, -altura / 2, 0);
+	glVertex3f(-largura / 2, -altura / 2, 0);
+
+	glEnd();
+	glPopMatrix();
+}
+
 void display(void)
 {
-	printf("malha dim %d\n", malha_dim);
 	//========================= Apaga ecran e lida com profundidade (3D)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT1);
 
 	//����������������������������� main screen
 
@@ -587,6 +621,9 @@ void display(void)
 
 	draw_gun();
 	drawTarget(total_levels, 0.2);
+
+	draw_obstacle(10, 4);
+
 	glDisable(GL_LIGHTING);
 
 	//�������������������������������������� controller
@@ -617,6 +654,8 @@ void display(void)
 	draw_stats();
 
 	//�������������������������������������������� mini target
+	glEnable(GL_LIGHTING);
+	glDisable(GL_LIGHT1);
 
 	glViewport(50, 200, 100, 100);
 	glMatrixMode(GL_PROJECTION);
@@ -629,6 +668,8 @@ void display(void)
 	gluLookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
 
 	draw_mini_target();
+
+	glDisable(GL_LIGHTING);
 
 	// reset buttons color
 	reset_but_color();
@@ -723,6 +764,22 @@ void keyboard(unsigned char key, int x, int y)
 		glutPostRedisplay();
 		break;
 
+	case 'y':
+	case 'Y':
+		TargetCoef += 0.1 * 128;
+		if (TargetCoef > 128)
+			TargetCoef = 128;
+
+		glutPostRedisplay();
+		break;
+	case 't':
+	case 'T':
+		TargetCoef -= 0.1 * 128;
+		if (TargetCoef < 0.1 * 128)
+			TargetCoef = 0.1 * 128;
+
+		glutPostRedisplay();
+		break;
 	case 'w':
 	case 'W':
 

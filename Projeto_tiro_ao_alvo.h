@@ -304,8 +304,17 @@ GLfloat darkSilverDif[] = {0.40754, 0.40754, 0.40754};
 GLfloat darkSilverSpec[] = {0.408273, 0.408273, 0.408273};
 GLint darkSilverCoef = 0.4 * 128;
 
+GLfloat turqAmb[] = {0.1f, 0.18725f, 0.1745f, 1.0f};
+GLfloat turqDif[] = {0.396f, 0.74151f, 0.69102f, 0.5f};
+GLfloat turqSpec[] = {0.297254f, 0.30829f, 0.306678f, 1.0f};
+GLint turqCoef = 0.4 * 128;
+
+GLint TargetCoef = 0.1 * 128;
+
 //============================================ Materials
 
 GLint malha_dim = 32;
+
+float offset_obst = 0, obst_change = 0.1;
 
 #endif /* tiro_ao_alvo_h */
